@@ -1,120 +1,475 @@
-> March, 2016: If you're on an old version of Jekyll Now and run into a) build warnings or b) syntax highlighting issues caused by [Jekyll 3 and GitHub Pages updates](https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0), just :sparkles:[update your _config.yml](https://github.com/barryclark/jekyll-now/pull/445/files):sparkles: and you'll be set!
+---
+layout: default
+---
 
-# Jekyll Now
+<style>
+    img {
+        border: 2px #445588 solid;
+    }
+    section {
+        width: 800px;
+    }
+    #banner {
+        width: 100%;
+    }
+    nav {
+        text-align: left;
+    }
+    li.tag-h3 {
+        padding-left: 8px;
+    }
+    pre {
+        background-color: #eee;
+    }
+    pre.highlight {
+        background-color: #333333;
+    }
+    code.language-command:before {
+        content: "> ";
+    }
+    code.language-command,
+    code.language-output {
+        background-color: inherit;
+        color: inherit;
+        text-shadow: inherit;
+    }
+    code.language-command {
+        font-weight: bold;
+        color: black;
+    }
+    nav {
+        height: 60%;
+        overflow-y: auto;
+    }
+    footer {
+        display: none;
+    }
+</style>
 
-**Jekyll** is a static site generator that's perfect for GitHub hosted blogs ([Jekyll Repository](https://github.com/jekyll/jekyll))
+[![Build Status](https://travis-ci.org/IBM/Hybrid-Cloud-Applications-and-Services.svg?branch=master)](https://travis-ci.org/IBM/Hybrid-Cloud-Applications-and-Services)
 
-**Jekyll Now** makes it easier to create your Jekyll blog, by eliminating a lot of the up front setup.
+# Extend your private cloud applications and services to public cloud, and vice versa
 
-- You don't need to touch the command line
-- You don't need to install/configure ruby, rvm/rbenv, ruby gems :relaxed:
-- You don't need to install runtime dependencies like markdown processors, Pygments, etc
-- If you're on Windows, this will make setting up Jekyll a lot easier
-- It's easy to try out, you can just delete your forked repository if you don't like it
+*Read this in other languages: [한국어](README-ko.md)、[中国](README-cn.md).*
 
-In a few minutes you'll be set up with a minimal, responsive blog like the one below giving you more time to spend on writing epic blog posts!
+A hybrid cloud model blends elements of both the private and the public cloud, and gives users choice and flexibility to run apps and services across on-premises systems and the cloud. In the simplest terms, the hybrid model is primarily a private cloud that allows an organization to tap into a public cloud when and where it makes sense. This code shows you how to expose your on-premise applications and services to public cloud, and vice versa.
 
-![Jekyll Now Theme Screenshot](/images/jekyll-now-theme-screenshot.jpg "Jekyll Now Theme Screenshot")
+In this code we have an on-premise Java application using JAX-RS and Swagger annotations, and database using CouchDB, both running in private cloud behind a firewall. We demonstrate how by leveraging public cloud services like Secure Gateway and API Connect we can create a tunnel and expose the private cloud application and APIs outside the corporate firewall.
 
-## Quick Start
+Moving beyond, we move application to a public cloud, and then guide how your application running on public cloud can access on-premise resources like database etc.
 
-### Step 1) Fork Jekyll Now to your User Repository
+## Scenarios
+- [Scenario One: Enable your application in Private Cloud to be accessed externally via Public Cloud](#scenario-one-enable-your-application-in-private-cloud-to-be-accessed-externally-via-public-cloud)
+- [Scenario Two: Enable your application in Public Cloud to connect to resources in Private Cloud](#scenario-two-enable-your-application-in-public-cloud-to-connect-to-resources-in-private-cloud)
 
-Fork this repo, then rename the repository to yourgithubusername.github.io.
+![Scenarios](images/hybrid-cloud.png)
 
-Your Jekyll blog will often be viewable immediately at <https://yourgithubusername.github.io> (if it's not, you can often force it to build by completing step 2)
+## Included Components
+The scenarios are accomplished by using:
+- [Cloud Foundry](https://www.cloudfoundry.org/)
+- [CouchDB](http://couchdb.apache.org)
+- [WebSphere Liberty](https://developer.ibm.com/wasdev/websphere-liberty/)
+- [API Connect](http://www-03.ibm.com/software/products/en/api-connect)
+- [Secure Gateway](https://console.ng.bluemix.net/docs/services/SecureGateway/sg_overview.html)
+- [Insights for Weather](https://console.ng.bluemix.net/docs/services/Weather/weather_overview.html#about_weather)
 
-![Step 1](/images/step1.gif "Step 1")
+## Prerequisites
 
-### Step 2) Customize and view your site
+Since we need [Maven](https://maven.apache.org/install.html) to build our sample application and [Docker](https://www.docker.com/community-edition#/download) to run the application and database. Please install [Maven](https://maven.apache.org/install.html) and [Docker](https://www.docker.com/community-edition#/download) before you proceed to [steps](#steps). If you prefer to use [Vagrant](https://www.vagrantup.com/) to manage temporary environments, a build file that creates an Ubuntu VM with a JDK, Maven, and Docker is in the project home directory.
 
-Enter your site name, description, avatar and many other options by editing the _config.yml file. You can easily turn on Google Analytics tracking, Disqus commenting and social icons here too.
+## Steps
 
-Making a change to _config.yml (or any file in your repository) will force GitHub Pages to rebuild your site with jekyll. Your rebuilt site will be viewable a few seconds later at <https://yourgithubusername.github.io> - if not, give it ten minutes as GitHub suggests and it'll appear soon
+### Connect your On-Premise environment to Public Cloud
+1. [Create a tunnel to connect your on-premise environment to public cloud](#1-create-a-tunnel-to-connect-your-on-premise-environment-to-public-cloud)
 
-> There are 3 different ways that you can make changes to your blog's files:
+### Scenario One: Enable your application in Private Cloud to be accessed externally via Public Cloud
 
-> 1. Edit files within your new username.github.io repository in the browser at GitHub.com (shown below).
-> 2. Use a third party GitHub content editor, like [Prose by Development Seed](http://prose.io). It's optimized for use with Jekyll making markdown editing, writing drafts, and uploading images really easy.
-> 3. Clone down your repository and make updates locally, then push them to your GitHub repository.
+2. [Build sample application to run on-premise and use On-Premise database](#2-build-sample-application-to-run-on-premise-and-use-on-premise-database)
+3. [Run the application and database On-Premise using WebSphere Liberty, CouchDB and Docker](#3-run-the-application-and-database-on-premise-using-websphere-liberty-couchdb-and-docker)
 
-![_config.yml](/images/config.png "_config.yml")
+### Scenario Two: Enable your application in Public Cloud to connect to resources in Private Cloud
 
-### Step 3) Publish your first blog post
+4. [Build sample application to run on Public Cloud and use On-Premise database](#4-build-sample-application-to-run-on-public-cloud-and-use-on-premise-database)
+5. [Run the application on Public Cloud using IBM Cloud and database On-Premise using CouchDB and Docker](#5-run-the-application-on-public-cloud-using-ibm-cloud-and-database-on-premise-using-couchdb-and-docker)
 
-Edit `/_posts/2014-3-3-Hello-World.md` to publish your first blog post. This [Markdown Cheatsheet](http://www.jekyllnow.com/Markdown-Style-Guide/) might come in handy.
+### Catalog and publish application APIs to the public using API Connect
+6. [Create an API Connect service in IBM Cloud](#6-create-an-api-connect-service-in-ibm-cloud)
+7. [Integrate WebSphere Liberty and API Connect: push and pull](#7-integrate-websphere-liberty-and-api-connect-push-and-pull)
+- 7.1 [Push Application APIs running on WebSphere into API Connect](#71-push-websphere-liberty-apis-into-api-connect)
+- 7.2 [Pull Application APIs running on WebSphere Liberty from API Connect](#72-pull-websphere-liberty-apis-from-api-connect)
 
-![First Post](/images/first-post.png "First Post")
+[Troubleshooting](#troubleshooting)
 
-> You can add additional posts in the browser on GitHub.com too! Just hit the + icon in `/_posts/` to create new content. Just make sure to include the [front-matter](http://jekyllrb.com/docs/frontmatter/) block at the top of each new blog post and make sure the post's filename is in this format: year-month-day-title.md
+# 1. Create a tunnel to connect your on-premise environment to public cloud
 
-## Local Development
+In this step, we will use the secure gateway service from IBM Cloud to create a tunnel from on-premise environment to public cloud host. In this sample, to keep configuration simple, the TCP protocol is used. The Secure Gateway product provides other protocol options (UDP, HTTP, HTTPS, TLS/SSL) that can provide greater security and authentication options for applications using the secure gateway service. Solutions with production applications and data should be assessed based upon their risk profile to select the correct Secure Gateway access protocol and authentication scheme. More details about Secure Gateway configurations can be found [here](https://console.ng.bluemix.net/docs/services/SecureGateway/sg_overview.html#sg_overview) and an example for application side and client side TLS setup can be accessed [here](https://console.ng.bluemix.net/docs/services/SecureGateway/sg_023.html#sg_023). Moving forward, we are proceeding with TCP to show the concept.
 
-1. Install Jekyll and plug-ins in one fell swoop. `gem install github-pages` This mirrors the plug-ins used by GitHub Pages on your local machine including Jekyll, Sass, etc.
-2. Clone down your fork `git clone https://github.com/yourusername/yourusername.github.io.git`
-3. Serve the site and watch for markup/sass changes `jekyll serve`
-4. View your website at http://127.0.0.1:4000/
-5. Commit any changes and push everything to the master branch of your GitHub user repository. GitHub Pages will then rebuild and serve your website.
+1. Create your [secure gateway service](https://console.ng.bluemix.net/catalog/services/secure-gateway?taxonomyNavigation=apis) from IBM Cloud.
 
-## Moar!
+2. Then, follow this [Getting started with the Secure Gateway](https://console.ng.bluemix.net/docs/services/SecureGateway/secure_gateway.html) tutorial to setup your gateway.
 
-I've created a more detailed walkthrough, [**Build A Blog With Jekyll And GitHub Pages**](http://www.smashingmagazine.com/2014/08/01/build-blog-jekyll-github-pages/) over at the Smashing Magazine website. Check it out if you'd like a more detailed walkthrough and some background on Jekyll. :metal:
+3. When you setup your secure gateway client, install **IBM Installer** and run it on your private cloud.
 
-It covers:
+	![installer](images/installer.png)
 
-- A more detailed walkthrough of setting up your Jekyll blog
-- Common issues that you might encounter while using Jekyll
-- Importing from Wordpress, using your own domain name, and blogging in your favorite editor
-- Theming in Jekyll, with Liquid templating examples
-- A quick look at Jekyll 2.0’s new features, including Sass/Coffeescript support and Collections
+4. After you open the secure gateway client with your Gateway ID and Security Token, you need to add access list entries for the on-premises endpoint. If you are doing [Scenario One: Enable your application in Private Cloud to be accessed externally via Public Cloud](#scenario-one-enable-your-application-in-private-cloud-to-be-accessed-externally-via-public-cloud), run `acl allow 127.0.0.1:9443` on your secure gateway client to enable access to your application server. If you are doing [Scenario Two: Enable your application in Public Cloud to connect to resources in Private Cloud](#scenario-two-enable-your-application-in-public-cloud-to-connect-to-resources-in-private-cloud), run `acl allow 127.0.0.1:5984` to enable access to your database.
 
-## Jekyll Now Features
+5. Now go back to your secure gateway page and create your destination. First, select **On-Premises** at Guided Setup and click next.
 
-✓ Command-line free _fork-first workflow_, using GitHub.com to create, customize and post to your blog  
-✓ Fully responsive and mobile optimized base theme (**[Theme Demo](http://jekyllnow.com)**)  
-✓ Sass/Coffeescript support using Jekyll 2.0  
-✓ Free hosting on your GitHub Pages user site  
-✓ Markdown blogging  
-✓ Syntax highlighting  
-✓ Disqus commenting  
-✓ Google Analytics integration  
-✓ SVG social icons for your footer  
-✓ 3 http requests, including your avatar  
+	![on-premises](images/on-premises.png)
 
-✘ No installing dependencies
-✘ No need to set up local development  
-✘ No configuring plugins  
-✘ No need to spend time on theming  
-✘ More time to code other things ... wait ✓!  
+6. Next, put down **127.0.0.1** for your resource hostname and **9443**(Scenario One) / **5984**(Scenario Two) for your port and click next.
 
-## Questions?
+	![hostname](images/hostname.png)
 
-[Open an Issue](https://github.com/barryclark/jekyll-now/issues/new) and let's chat!
+7. Next, select **TCP** for your protocol and click next. Then, select **None** for your authentication and click next. Then, do not put anything on your IP table rules. Lastly, name your destination and click **Add Destination**.
 
-## Other forkable themes
+8. View and note your cloud host by clicking on the **gear icon** on your destination.
 
-You can use the [Quick Start](https://github.com/barryclark/jekyll-now#quick-start) workflow with other themes that are set up to be forked too! Here are some of my favorites:
+	![cloud-host](images/cloud-host.png)
 
-- [Hyde](https://github.com/poole/hyde) by MDO
-- [Lanyon](https://github.com/poole/lanyon) by MDO
-- [mojombo.github.io](https://github.com/mojombo/mojombo.github.io) by Tom Preston-Werner
-- [Left](https://github.com/holman/left) by Zach Holman
-- [Minimal Mistakes](https://github.com/mmistakes/minimal-mistakes) by Michael Rose
-- [Skinny Bones](https://github.com/mmistakes/skinny-bones-jekyll) by Michael Rose
+    If you are doing Scenario One, continue, else jump to [Scenario 2](#4-build-sample-application-to-run-on-public-cloud-and-use-on-premise-database).
 
-## Credits
+# 2. Build sample application to run on-premise and use On-Premise database
 
-- [Jekyll](https://github.com/jekyll/jekyll) - Thanks to its creators, contributors and maintainers.
-- [SVG icons](https://github.com/neilorangepeel/Free-Social-Icons) - Thanks, Neil Orange Peel. They're beautiful.
-- [Solarized Light Pygments](https://gist.github.com/edwardhotchkiss/2005058) - Thanks, Edward.
-- [Joel Glovier](http://joelglovier.com/writing/) - Great Jekyll articles. I used Joel's feed.xml in this repository.
-- [David Furnes](https://github.com/dfurnes), [Jon Uy](https://github.com/jonuy), [Luke Patton](https://github.com/lkpttn) - Thanks for the design/code reviews.
-- [Bart Kiers](https://github.com/bkiers), [Florian Simon](https://github.com/vermluh), [Henry Stanley](https://github.com/henryaj), [Hun Jae Lee](https://github.com/hunjaelee), [Javier Cejudo](https://github.com/javiercejudo), [Peter Etelej](https://github.com/etelej), [Ben Abbott](https://github.com/jaminscript), [Ray Nicholus](https://github.com/rnicholus), [Erin Grand](https://github.com/eringrand), [Léo Colombaro](https://github.com/LeoColomb), [Dean Attali](https://github.com/daattali), [Clayton Errington](https://github.com/cjerrington), [Colton Fitzgerald](https://github.com/coltonfitzgerald), [Trace Mayer](https://github.com/sunnankar) - Thanks for your [fantastic contributions](https://github.com/barryclark/jekyll-now/commits/master) to the project!
+Our sample Airline API application is an airline booking application that demonstrates how API application can store its data using on-prem database.
 
-## Contributing
+We will also add our own Weather API credential from public IBM Cloud for the application. The Weather API will provide the weather condition for destination airports selected by clients.
 
-Issues and Pull Requests are greatly appreciated. If you've never contributed to an open source project before I'm more than happy to walk you through how to create a pull request.
 
-You can start by [opening an issue](https://github.com/barryclark/jekyll-now/issues/new) describing the problem that you're looking to resolve and we'll go from there.
+1. Create [Weather API service](https://console.ng.bluemix.net/catalog/services/weather-company-data?taxonomyNavigation=data) in IBM Cloud.
 
-I want to keep Jekyll Now as minimal as possible. Every line of code should be one that's useful to 90% of the people using it. Please bear that in mind when submitting feature requests. If it's not something that most people will use, it probably won't get merged. :guardsman:
+2. Go to your Weather API's **Service credentials** and mark down your username and password. (You may need to go to **New credential** to create a set first.) Then run `cd airline_app` and add your username and password credential to your `server.xml` file (replace `your_user` and `your_password` with the real service credentials):
+
+```
+        <jndiEntry jndiName="weather_user" value="your_user" />
+        <jndiEntry jndiName="weather_password" value="your_password" />
+```
+
+# 3. Run the application and database on-premise using WebSphere Liberty, CouchDB and Docker
+
+In this example, we will use WebSphere Liberty for our application server, and local CouchDB for our database. We will first build our application server docker image.
+
+At the end of this step, you should able to call your application APIs via localhost.
+
+1. To deploy the Airline API application, put the **.war** file in **airline_app/apps** folder and configure the **server.xml** file. For this example, we are using airlines API application, but you can also add your own application.
+
+	In this main directory, build your server and run it on your local host.
+
+    ```bash
+    docker build -t hybrid/airlines .
+    docker-compose up
+    ```
+   	The application server and database containers will start and the terminal will display all the logs from your app.
+
+    After you have your server and database running, open another terminal and run the following commands to initiate couchDB.
+
+    ```bash
+    bash database_init.sh
+    ```
+
+2. To reach the WebSphere Liberty API Discovery user interface, go to `https://localhost:9443/ibm/api/explorer`. Accept any certificate warnings you see about a self-signed certificate. Use the credentials from your server.xml to login (For this example, the **username** is `admin` and the **password** is `admin`).
+
+	You should see something like this in your API Discovery user interface.
+
+	![discovery](images/discovery.png)
+
+3. As shown in the following screen capture, you can click the **Try it out** button, which starts the sample Airline application, running on Docker
+
+	![try it out](images/try-it-out.png)
+
+4. Now, go to `https://<Cloud Host:Port>/ibm/api/explorer/` and verify your local server interface can be accessed from public 'Cloud Host' gateway server. Remember, 'Cloud Host' is the Secure gateway server information we noted down at the end of [Step 1](#1-create-a-tunnel-to-connect-your-on-premise-enviroment-to-public-cloud), and your default username is **admin** and password is **admin**. Note that since we are using TCP in this sample, being able to reach this URL means that any system on the internet can now connect to the WebSphere Liberty application if they know the name of the Cloud Host and port. In production, you would want to use TLS/SSL with [Mutual Authentication](https://console.ng.bluemix.net/docs/services/SecureGateway/sg_023.html#sg_007) for more security.
+
+Jump to [Step 6](#6-create-an-api-connect-service-in-ibm-cloud) to expose your application APIs via API Connect
+
+# 4. Build sample application to run on Public Cloud and use On-Premise database
+
+Our sample API application is an airline booking application that demonstrates how API application can store its data using on-premise database and enhance its API features using IBM Cloud's Data Analytic Service.
+
+In this step, we will add our own Weather API credential for our application and build our own .war file using Maven.
+
+
+1. Create your [Weather API service](https://console.ng.bluemix.net/catalog/services/weather-company-data?taxonomyNavigation=data). The Weather API can provide the airport location and weather condition for clients.
+
+
+2. Go to your Weather API's **Service credentials** and mark down your username and password.  (You may need to go to **New credential** to create a set first.) Then run `cd airline_app` and add your username and password credential to your `server.xml` file (replace `your_user` and `your_password` with the real service credentials):
+
+```
+        <jndiEntry jndiName="weather_user" value="your_user" />
+        <jndiEntry jndiName="weather_password" value="your_password" />
+```
+
+3. In the Gateway configuration, set the port to 5984 (if you have been following this pattern from the beginning, your port should now be 9443 since the gateway was being used to access the Liberty app in the first part of the pattern.)  Also, run `acl allow 127.0.0.1:5984` in the Gateway client to allow ingress to the on-prem database.
+
+4. Change the database address to your *cloud host:port* in your **server.xml** file, similar to the process used for the Weather service credentials.
+
+
+# 5. Run the application on Public Cloud using IBM Cloud and database On-Premise using CouchDB and Docker
+
+1. Create an on-premise database using Docker. Run the following commands to use the community's CouchDB Docker image.
+
+    ```bash
+    docker pull couchdb:latest
+    docker run -p 5984:5984 couchdb
+    ```
+
+    Then, initiate couchDB with the following script.
+
+    ```bash
+    bash database_init.sh
+    ```
+
+2. Now, you can go back to the main directory and push your app to the cloud. For this example, we will push our app to the IBM Cloud Foundry. So we need to install the [IBM Cloud CLI](https://console.bluemix.net/docs/cli/index.html#overview)
+
+3. Use the following commands to login to Cloud Foundry and push your application to the cloud.
+
+    >Note: Replace <app_name> with an unique application name within your IBM Cloud region. This application name is the name of your API container.
+
+    ```bash
+    ibmcloud cf login
+    ibmcloud cf push <app_name> -p airline_app
+    ```
+
+After the app starts, you will see a URL you can use to access it:
+
+```
+Waiting for app to start...
+
+name:              airlines
+requested state:   started
+instances:         1/1
+usage:             1G x 1 instances
+routes:            airlines.opencloud-cluster.us-south.containers.appdomain.cloud
+last uploaded:     Sat 13 Oct 23:33:40 EDT 2018
+stack:             cflinuxfs2
+buildpack:         Liberty for Java(TM) (SVR-DIR, liberty-18.0.0_1, buildpack-v3.19-20180313-1017, ibmjdk-1.8.0_20180214, env)
+start command:     .liberty/initial_startup.rb
+```
+
+3. To reach the application API Discovery user interface, go to https://<app_name>.opencloud-cluster.us-south.containers.appdomain.cloud/ibm/api/explorer/ (replace with your URL from the `routes` line.) Then, use the credentials from your server.xml to login (For this example, the **username** is `admin` and the **password** is `admin`).
+
+    You should see something like this in your API Discovery user interface.
+
+    ![discovery](images/discovery.png)
+
+4. As shown in the following screen capture, you can click the **Try it out** button, which calls your application that runs on Cloud Foundry with your on-premise database.
+
+    ![try it out](images/try-it-out.png)
+
+# 6. Create an API Connect service in IBM Cloud
+
+In this step, we will setup API Connect service to help us expose our application APIs to public.
+
+1. To add API Connect as a IBM Cloud service, go to the [API Connect service](https://console.ng.bluemix.net/catalog/services/api-connect?taxonomyNavigation=services)
+
+
+2. Then, select the **Essentials plan** and click **Create**.
+
+3. Go to dashboard by clicking here
+
+	![dashboard](images/dashboard.png)
+
+4. By default, an empty catalog called **Sandbox** is created. To enable its corresponding developer portal, click **Sandbox** then **Settings**.
+
+5. Click **Portal**, and then under **Portal Configuration**, select **IBM Developer Portal**. A Portal URL is automatically inserted.
+
+6. Take note of the Portal URL, which reveals the target server address and organization that you need later. The URL is broken down into the following three parts, as shown in the following screen capture:
+
+	![portal-url](images/portal-url.png)
+
+    - 1 is the catalog's short name, in this case, sb.
+    - 2 is your organization ID, in the example, arthurdmcaibmcom-dev.
+    - 3 is the target address of your API Connect instance, for example, https://us.apiconnect.ibmcloud.com.
+
+7. Click Save (floppy disk icon) at the top right corner.
+
+	![save-changes](images/apisave.png)
+	
+	 You will see the following message:
+	 
+    `
+    Creating the developer portal for catalog 'Sandbox' may take a few minutes. You will receive an email when the portal is available.
+    `
+
+8. After you received the email, go to the **Portal URL** and you will see something like this.
+
+	![portal](images/portal.png)
+
+	This is where enterprise developers go to find the products (for example, an API or a group of APIs) that are exposed in the API catalog. Developers also can interact with each other through the Blogs and Forums links.
+
+# 7. Integrate WebSphere Liberty and API Connect: push and pull
+> Choose either [push](#71-push-websphere-liberty-apis-into-api-connect) or [pull](#72-pull-websphere-liberty-apis-from-api-connect) WebSphere Liberty APIs from API Connect. Note: push integration won't work for users who have enterprise federated IBMids for access to IBM Cloud at the current time.
+
+## 7.1 Push WebSphere Liberty APIs into API Connect
+
+In this step, we will learn about how to use the post request on API discovery to push our APIs into API Connect.
+
+1. Go to `https://<Cloud Host:Port/app_name>/ibm/api/explorer/`
+
+2. Click **POST** for the apiconnect endpoint
+
+	![post](images/post.png)
+
+3. Fill in the parameters as shown in the following screen capture, your organization ID should be the second part of your Portal URL.
+
+	![parameter](images/parameter.png)
+
+4. You want to publish this API product, not just stage it, so leave the stageOnly parameter as false. The X-APIM-Authorization parameter represents the credentials that Liberty uses to log into API Connect. The description on the right side provides details on the accepted format. The following example uses: `apimanager/bluemixAccount@domain.com:myBluemixPassword`.
+
+	![mypassword](images/mypassword.png)
+
+
+5. For Scenario Two, we can click the sample JSON file on your right and publish your APIs.
+
+	For Scenario One, since we are running our APIs on the private cloud, we do not want to use the sample JSON file because that will set the APIs target URL to the private cloud. Instead, we want to change the `<cloud host:port>` part in **target-url** (line 38) from the following JSON file (you can also get it from the **discovery-post.json** file) to your cloud host:port (e.g. `"https://cap-sg-prd-3.integration.ibmcloud.com:16218$(request.path)"`). Then copy and paste it into the body input box.
+	```JSON
+	{
+	  "product": "1.0.0",
+	  "info": {
+	    "name": "pushed-product",
+	    "title": "A Product that encapsulates Liberty APIs",
+	    "version": "1.0.0"
+	  },
+	  "visibility": {
+	    "view": {
+	      "enabled": true,
+	      "type": "public",
+	      "tags": [
+	        "string"
+	      ],
+	      "orgs": [
+	        "string"
+	      ]
+	    },
+	    "subscribe": {
+	      "enabled": true,
+	      "type": "authenticated",
+	      "tags": [
+	        "string"
+	      ],
+	      "orgs": [
+	        "string"
+	      ]
+	    }
+	  },
+	  "apis": {
+	    "liberty": {
+	      "name": "liberty-api:1.0.0",
+	      "x-ibm-configuration": {
+	        "assembly": {
+	          "execute": [
+	            {
+	              "invoke": {
+	                "target-url": "<cloud host:port>$(request.path)",
+	                "title": "Invocation"
+	              }
+	            }
+	          ]
+	        }
+	      }
+	    }
+	  },
+	  "plans": {
+	    "default": {
+	      "title": "Default Plan",
+	      "rate-limit": {
+	        "value": "100/hour",
+	        "hard-limit": false
+	      },
+	      "approval": false
+	    }
+	  },
+	  "createdAt": "2017-05-01T16:13:05.912Z",
+	  "createdBy": "string"
+	}
+	```
+	![json](images/json.png)
+
+6. Now you're ready to publish these APIs. Click **Try it out!**
+
+	![try](images/try.png)
+
+7. In less than a minute, you should see the operation return successfully (code 200), with the response content, code and headers displayed, as shown in the following screen capture:
+
+	![result](images/result.png)
+
+Congratulations. Your API is published. Now you can explore the API Connect Developer Portal just as consumers of your API would. Go to your **Portal URL** and click **API Products**.
+
+Select your API Product and try it through the API Connect Developer Portal. Click any API call and try it using the **call operation** button.
+
+![api-connect](images/api-connect.png)
+
+## 7.2 Pull WebSphere Liberty APIs from API Connect
+
+In this step, we will learn about how to create and manage new APIs and products on API connect using API connect's user interface.
+
+1. From the main API Connect dashboard in IBM Cloud, click the menu icon and select **Drafts**. Click **APIs**, click **Add**, and select **Import API from a file or URL**.
+
+	![import](images/import.png)
+
+2. In the **Import API from a file or URL** window, click **Or import from URL**.
+
+	For the URL, type the Liberty URL that you want to use to import the Swagger document. For this example, you use `https://<Cloud Host:Port/app_name>/ibm/api/docs/apiconnect`. As before, in this example the username is **admin** and password is **admin**.
+
+![import](images/import-url-new.png)
+
+
+3. For Scenario Two, you do not have to do anything.
+
+After importing the cloud URL, you will see a screen like this
+
+![import](images/import-api-airlines.png)
+	
+For Scenario One, since our APIs are hosted on the private cloud, we need to set the APIs target URL to the cloud host. Therefore, after you imported your API, go to **source**. Then go to the bottom of the page (around line 532) and change the **target-url**'s value to `'<cloud host:port>$(request.path)'` (replace `<cloud host:port>` to your own cloud host:port). Then click the **save icon** on the top right corner.
+
+![target-url](images/target-url.png)
+
+4. Click **All APIs** to go back into the main Drafts page, Click **Products**, and then click **Add > New Product**. In the Add a new product window, type in a title (could be anything) and then click **Add**.
+
+5. The design view opens for the Product. Scroll down to the APIs section and click on the + icon.
+
+	![api](images/api.png)
+
+6. Select the API you just imported, and click **Apply**.
+
+7. In the Plans section, you can create different plans with different rate limits, to control which methods from each API are exposed. For this example, please use the default plan.
+
+	Click the **save icon** to save your changes.
+
+8. Now you are ready to stage your Product into a catalog. Click the **cloud icon** and select the catalog where you want to stage the APIs.
+
+9. To go back into the catalog, click the menu icon , and select **Dashboard**. Then click the menu icon for your staged product and select **Publish**.
+
+	![publish](images/publish.png)
+
+10. In the new window that opens, you can edit who can view your APIs and who can subscribe to your API Plans. For this example, use the defaults and click **Publish**.
+
+Congratulations. Your API is published. Now you can explore the API Connect Developer Portal just as consumers of your API would. Go to your **Portal URL** and click **API Products**.
+
+Select your API Product and try it through the API Connect Developer Portal. Click any API call and try it using the **call operation** button.
+
+![api-connect](images/api-connect.png)
+
+# Troubleshooting
+
+To stop your Docker-compose services, in this main directory, run
+
+```bash
+docker-compose down
+```
+
+To remove your Docker container, run
+
+```bash
+docker ps --all
+docker kill <container ID> #run this command if your container is still running
+docker rm <container ID>
+```
+
+To remove your Insights for Weather, API connect and Secure Gateway service, go to your IBM Cloud dashboard. Then click the **menu icon** and then select **Delete Service**.
+
+# License
+
+[Apache 2.0](LICENSE)
+
+[back](./)
