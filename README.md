@@ -1,4 +1,4 @@
-# Better DevOps with LogDNA and IBM Cloud Kubernetes service
+# Better DevOps with LogDNA and IBM Cloud Kubernetes Service
 
 # Introduction
 	
